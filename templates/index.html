@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+
+
+<h1>
+Главная
+</h1>
+
+
+
+<div class="cards">
+
+
+<div class="card">
+
+<h3>
+Товаров
+</h3>
+
+<div class="number">
+{{log.source.offers}}
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>
+Категорий
+</h3>
+
+<div class="number">
+{{log.source.categories}}
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>
+Фидов
+</h3>
+
+<div class="number">
+{{log.result.feeds}}
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h3>
+Статус
+</h3>
+
+
+{% if log.status=="success" %}
+
+<span class="ok">
+OK
+</span>
+
+{% else %}
+
+<span class="error">
+Ошибка
+</span>
+
+{% endif %}
+
+
+</div>
+
+
+</div>
+
+
+<br>
+
+
+<div class="card">
+
+
+<h2>
+Последний запуск
+</h2>
+
+
+<p>
+Дата:
+{{log.date}}
+</p>
+
+
+<p>
+Время:
+{{log.duration}}
+</p>
+
+
+
+<a href="/run">
+
+<button>
+🔄 Запустить обновление
+</button>
+
+</a>
+
+
+</div>
+
+
+{% endblock %}

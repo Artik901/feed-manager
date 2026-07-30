@@ -1,0 +1,373 @@
+{% extends "layout.html" %}
+
+
+{% block content %}
+
+
+<h1>
+⚙ Настройки наценки
+</h1>
+
+
+
+<div class="card actions">
+
+
+<div>
+
+<h3>
+⚙ Управление
+</h3>
+
+
+<p>
+Активных категорий:
+{{ categories.values()
+|selectattr("percent","gt",0)
+|list
+|length
+}}
+
+</p>
+
+
+</div>
+
+
+
+<div class="action-buttons">
+
+
+
+<form method="post"
+action="/settings/clear_markup">
+
+
+<button
+class="danger"
+onclick="return confirm('Очистить все наценки?')"
+>
+
+🧹 Очистить все
+
+</button>
+
+
+</form>
+
+
+</div>
+
+
+</div>
+
+
+
+<br>
+
+
+
+<form method="post"
+action="/settings/save">
+
+
+
+
+
+{% for id, category in categories.items() %}
+
+
+
+<div class="card category
+
+{% if category.percent > 0
+or category.children|selectattr('percent','gt',0)|list
+%}
+open
+{% endif %}
+
+">
+
+
+
+
+
+<div class="category-title"
+onclick="toggle(this)"
+>
+
+
+<div>
+
+
+{{ category.name }}
+
+
+
+{% if category.percent > 0 %}
+
+
+<span class="badge">
+
+🔥 {{ category.percent }}%
+
+</span>
+
+
+
+{% elif category.children|selectattr("percent","gt",0)|list %}
+
+
+
+<span class="badge warning">
+
+⚙ есть настройки
+
+</span>
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+<div>
+▼
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="category-body">
+
+
+
+
+
+<div class="main-row">
+
+
+
+<div>
+
+
+<b>
+Основная категория
+</b>
+
+
+<input
+type="hidden"
+name="category_id"
+value="{{category.id}}"
+>
+
+
+</div>
+
+
+
+
+
+<div class="percent-box">
+
+
+<input
+
+class="percent-input"
+
+type="number"
+
+name="percent"
+
+value="{{category.percent}}"
+
+onfocus="clearZero(this)"
+
+>
+
+
+<span>
+%
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+{% for child in category.children %}
+
+
+
+<div class="child-row">
+
+
+
+<div class="child-name">
+
+
+{{ child.name }}
+
+
+
+
+{% if child.percent > 0 %}
+
+
+
+<span class="badge">
+
+🔥 {{ child.percent }}%
+
+</span>
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+
+<div class="percent-box">
+
+
+<input
+
+type="hidden"
+
+name="category_id"
+
+value="{{child.id}}"
+
+>
+
+
+
+
+<input
+
+class="percent-input"
+
+type="number"
+
+name="percent"
+
+value="{{child.percent}}"
+
+onfocus="clearZero(this)"
+
+>
+
+
+
+<span>
+%
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+{% endfor %}
+
+
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+{% endfor %}
+
+
+
+
+
+<br>
+
+
+
+<button>
+
+💾 Сохранить
+
+</button>
+
+
+
+</form>
+
+
+
+
+
+
+
+<script>
+
+
+function toggle(el){
+
+    el.parentElement.classList.toggle(
+        "open"
+    );
+
+}
+
+
+
+function clearZero(el){
+
+    if(el.value === "0"){
+
+        el.value = "";
+
+    }
+
+}
+
+
+
+</script>
+
+
+
+
+{% endblock %}

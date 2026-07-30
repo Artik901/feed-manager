@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+Фиды
+{% endblock %}
+
+
+{% block content %}
+
+
+<h1>
+📦 Фиды
+</h1>
+
+
+<div class="cards">
+
+
+{% for feed in feeds %}
+
+
+<div class="card feed-card">
+
+
+<h2>
+{{feed.name}}
+</h2>
+
+
+<div class="feed-info">
+
+Товаров:
+
+<b>
+{{feed.offers}}
+</b>
+
+</div>
+
+
+
+<a class="button feed-button"
+href="/feed/{{feed.slug}}"
+target="_blank">
+
+Открыть XML
+
+</a>
+
+
+</div>
+
+
+{% endfor %}
+
+
+</div>
+
+
+{% endblock %}
