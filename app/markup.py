@@ -116,7 +116,7 @@ def apply_markup(
     )
 
 
-    offer["markup"] = coefficient
+
 
 
 

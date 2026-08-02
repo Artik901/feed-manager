@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, send_file, request
+import subprocess
 from pathlib import Path
 import json
 
@@ -34,7 +35,25 @@ app = Flask(
     static_folder="static",
     template_folder="templates"
 )
+def start_feed_update():
 
+    try:
+        subprocess.Popen(
+            [
+                "sudo",
+                "systemctl",
+                "start",
+                "feed-update.service"
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+    except Exception as e:
+        print(
+            "Ошибка запуска обновления:",
+            e
+        )
 @app.context_processor
 def inject_globals():
 
@@ -362,7 +381,7 @@ def save_settings_page():
         }
 
     )
-
+    start_feed_update()
 
     return redirect(
         "/settings"
@@ -375,6 +394,7 @@ def clear_markup():
             "markup": []
         }
     )
+    start_feed_update()
 
     return redirect("/settings")
 
