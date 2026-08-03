@@ -24,7 +24,9 @@
 
 
 <body>
-
+<button class="mobile-menu-btn" onclick="toggleMenu()">
+    ☰
+</button>
 
 {% if current_user.is_authenticated %}
 
@@ -510,7 +512,18 @@ document.addEventListener(
 </script>
 
 
+<script>
 
+function toggleMenu(){
+
+    document
+    .querySelector(".sidebar")
+    .classList.toggle("open");
+
+}
+
+
+</script>
 </body>
 
 </html>
