@@ -1,122 +1,440 @@
 {% extends "layout.html" %}
 
 
+{% block title %}
+Главная
+{% endblock %}
+
+
+
 {% block content %}
 
 
-<h1>
-Главная
-</h1>
+
+<div class="page-header">
+
+
+    <div>
+
+        <h1>
+            🚀 Панель управления
+        </h1>
+
+
+        <p class="page-description">
+            Состояние генерации товарных фидов
+        </p>
+
+
+    </div>
 
 
 
-<div class="cards">
+    <button id="run-btn" class="button run-button" onclick="startUpdate()">
 
+        🔄 Запустить обновление
 
-<div class="card">
-
-<h3>
-Товаров
-</h3>
-
-<div class="number">
-{{log.source.offers}}
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h3>
-Категорий
-</h3>
-
-<div class="number">
-{{log.source.categories}}
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h3>
-Фидов
-</h3>
-
-<div class="number">
-{{log.result.feeds}}
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h3>
-Статус
-</h3>
-
-
-{% if log.status=="success" %}
-
-<span class="ok">
-OK
-</span>
-
-{% else %}
-
-<span class="error">
-Ошибка
-</span>
-
-{% endif %}
+    </button>
 
 
 </div>
 
 
+
+
+
+
+{% if log %}
+
+
+
+<div class="dashboard-grid">
+
+
+
+    <div class="card dashboard-card">
+
+
+        <div class="dashboard-icon">
+            📦
+        </div>
+
+
+        <div>
+
+            <span>
+                Товары
+            </span>
+
+
+            <strong>
+                {{ log.source.offers }}
+            </strong>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <div class="card dashboard-card">
+
+
+        <div class="dashboard-icon">
+            📂
+        </div>
+
+
+        <div>
+
+            <span>
+                Категории
+            </span>
+
+
+            <strong>
+                {{ log.source.categories }}
+            </strong>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <div class="card dashboard-card">
+
+
+        <div class="dashboard-icon">
+            📄
+        </div>
+
+
+        <div>
+
+            <span>
+                Фиды
+            </span>
+
+
+            <strong>
+                {{ log.result.feeds }}
+            </strong>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <div class="card dashboard-card">
+
+
+        <div class="dashboard-icon">
+            ⚙
+        </div>
+
+
+        <div>
+
+            <span>
+                Статус
+            </span>
+
+
+
+            {% if log.status=="success" or log.status=="OK" %}
+
+
+            <strong class="success-text">
+
+                ✓ OK
+
+            </strong>
+
+
+            {% else %}
+
+
+            <strong class="error-text">
+
+                ✕ Ошибка
+
+            </strong>
+
+
+            {% endif %}
+
+
+
+        </div>
+
+
+    </div>
+
+
+
 </div>
+
+
+
+
 
 
 <br>
 
 
-<div class="card">
-
-
-<h2>
-Последний запуск
-</h2>
-
-
-<p>
-Дата:
-{{log.date}}
-</p>
-
-
-<p>
-Время:
-{{log.duration}}
-</p>
 
 
 
-<a href="/run">
 
-<button>
-🔄 Запустить обновление
-</button>
+<div class="card last-run">
 
-</a>
+
+
+    <div class="section-title">
+
+        <h2>
+            Последний запуск
+        </h2>
+
+
+    </div>
+
+
+
+
+    <div class="run-info">
+
+
+
+        <div>
+
+            <span>
+                📅 Дата
+            </span>
+
+
+            <b>
+                {{ log.date }}
+            </b>
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <span>
+                ⏱ Время выполнения
+            </span>
+
+
+            <b>
+                {{ log.duration }}
+            </b>
+
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <span>
+                🔍 Проверка
+            </span>
+
+
+            <b>
+
+
+                {% if log.check.success %}
+
+                <span class="ok">
+                    OK
+                </span>
+
+                {% else %}
+
+                <span class="error">
+                    Ошибка
+                </span>
+
+                {% endif %}
+
+
+
+            </b>
+
+
+        </div>
+
+
+
+
+    </div>
+
+
 
 
 </div>
 
 
+
+
+
+{% else %}
+
+<div class="card empty-state">
+
+
+    <div class="dashboard-icon" style="margin:auto">
+
+        🚀
+
+    </div>
+
+
+    <h2>
+        Первый запуск генерации
+    </h2>
+
+
+    <p>
+        Данные ещё не загружались.
+        Запустите обновление товаров.
+    </p>
+
+
+
+    <button  id="run-btn" class="button run-button" onclick="startUpdate()">
+
+        🔄 Запустить обновление
+
+    </button>
+
+
+</div>
+
+
+{% endif %}
+
+
+<div id="update-overlay" class="update-overlay">
+
+
+    <div class="update-box">
+
+        <div class="loader"></div>
+
+
+        <h2>
+            Обновление товаров...
+        </h2>
+
+
+        <p id="update-status">
+            Подготовка данных
+        </p>
+
+
+    </div>
+
+
+</div>
+<script>
+
+
+    function startUpdate() {
+
+
+        const btn =
+            document.getElementById("run-btn");
+
+
+        const overlay =
+            document.getElementById("update-overlay");
+
+
+        const status =
+            document.getElementById("update-status");
+
+
+
+        btn.disabled = true;
+
+        btn.innerHTML =
+            "⏳ Запуск...";
+
+
+        overlay.classList.add("show");
+
+
+
+        let steps = [
+
+            "Загрузка товаров 📦",
+
+            "Обработка категорий 📂",
+
+            "Создание фидов 📄",
+
+            "Проверка данных 🔍"
+
+        ];
+
+
+
+        let i = 0;
+
+
+
+        let timer = setInterval(() => {
+
+
+            status.innerHTML = steps[i];
+
+
+            i++;
+
+
+            if (i >= steps.length) {
+
+                clearInterval(timer);
+
+
+                window.location.href = "/run";
+
+            }
+
+
+        }, 1200);
+
+
+
+    }
+
+
+
+</script>
 {% endblock %}

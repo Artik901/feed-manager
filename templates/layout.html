@@ -3,20 +3,22 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<link rel="icon" 
-href="{{ url_for('static', filename='favicon.png') }}">
-
-<title>
-Feed Manager
-</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<link rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
 
 
+    <title>
+        {% block title %}
+        Feed Manager
+        {% endblock %}
+    </title>
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
@@ -24,84 +26,483 @@ href="{{ url_for('static', filename='style.css') }}">
 <body>
 
 
-<div class="wrapper">
+    <div class="app-layout">
 
 
 
-<div class="sidebar">
+        <aside class="sidebar">
 
 
-
-<div class="logo">
-
-    🚀 Feed Manager
-
-    <small>
-        {{ shop_name }}
-    </small>
-
-</div>
+            <div class="brand">
 
 
+                <div class="brand-icon">
+                    🚀
+                </div>
 
 
-<a href="/" 
-class="{% if request.path=='/' %}active{% endif %}">
-🏠 Главная
-</a>
+                <div>
+
+                    <div class="brand-title">
+                        Feed Manager
+                    </div>
 
 
-
-<a href="/feeds"
-class="{% if request.path.startswith('/feeds') %}active{% endif %}">
-📦 Фиды
-</a>
+                    <div class="brand-shop">
+                        {{ shop_name }}
+                    </div>
 
 
-
-<a href="/history"
-class="{% if request.path.startswith('/history') %}active{% endif %}">
-📜 История
-</a>
+                </div>
 
 
-
-<a href="/settings"
-class="{% if request.path.startswith('/settings') %}active{% endif %}">
-⚙ Настройки
-</a>
-
-
-
-</div>
+            </div>
 
 
 
 
 
-<div class="content">
+            <nav class="menu">
 
 
-{% block content %}
+                <a href="/" class="{% if request.path=='/' %}active{% endif %}">
 
-{% endblock %}
+                    <span>🏠</span>
 
+                    Главная
 
-</div>
-
-
-
-</div>
+                </a>
 
 
 
 
+                <a href="/feeds" class="{% if request.path.startswith('/feeds') %}active{% endif %}">
 
-<footer>
+                    <span>📦</span>
 
-{{ shop_name }} · Feed Manager v{{ app_version }}
+                    Фиды
 
-</footer>
+                </a>
+
+
+
+
+                <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
+
+                    <span>📜</span>
+
+                    История
+
+                </a>
+
+
+
+
+                <a href="/settings" class="{% if request.path.startswith('/settings') %}active{% endif %}">
+
+                    <span>💰</span>
+
+                    Наценки
+
+                </a>
+
+
+
+
+                <a href="/descriptions" class="{% if request.path.startswith('/descriptions') %}active{% endif %}">
+
+                    <span>📝</span>
+
+                    Описания
+
+                </a>
+
+
+
+            </nav>
+
+
+
+
+
+            <div class="sidebar-bottom">
+
+
+                <div class="user-card">
+
+
+                    <div class="avatar">
+                        👤
+                    </div>
+
+
+                    <div>
+
+                        <div class="username">
+                            {{ current_user.id }}
+                        </div>
+
+
+                        <div class="role">
+                            Администратор
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+
+                <a class="logout" href="/logout">
+
+                    🚪 Выйти
+
+                </a>
+
+
+
+            </div>
+
+
+        </aside>
+
+
+
+
+
+
+
+        <div class="main-area">
+
+
+
+            <header class="topbar">
+
+
+                <div>
+
+                    <h2>
+
+
+                        {% if request.path=='/' %}
+
+                        Главная
+
+
+                        {% elif request.path.startswith('/feeds') %}
+
+                        Фиды
+
+
+                        {% elif request.path.startswith('/history') %}
+
+                        История
+
+
+                        {% elif request.path.startswith('/settings') %}
+
+                        Наценки
+
+
+                        {% elif request.path.startswith('/descriptions') %}
+
+                        Описания
+
+
+                        {% else %}
+
+                        Feed Manager
+
+
+                        {% endif %}
+
+
+                    </h2>
+
+
+                </div>
+
+
+
+
+
+                <div class="system-status">
+
+                    <span class="dot"></span>
+
+                    Система работает
+
+                </div>
+
+
+            </header>
+
+
+
+
+
+
+
+            <main class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% if messages %}
+
+                <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+
+                {{ message }}
+
+                </div>
+
+                {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+                {% endwith %}
+
+                {% block content %}
+
+                {% endblock %}
+
+
+            </main>
+
+
+
+
+
+
+
+            <footer>
+
+
+                {{ shop_name }}
+
+                <span>
+                    ·
+                </span>
+
+                Feed Manager
+
+                <span>
+                    v{{ app_version }}
+                </span>
+
+
+            </footer>
+
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <!-- UNIVERSAL MODAL -->
+
+
+    <div id="modal-overlay" class="modal-overlay">
+
+
+        <div class="modal">
+
+
+            <h3 id="modal-title">
+                Подтверждение
+            </h3>
+
+
+
+            <p id="modal-text">
+                Вы уверены?
+            </p>
+
+
+
+
+            <div class="modal-actions">
+
+
+                <button class="button secondary" onclick="closeConfirmModal()">
+
+                    Отмена
+
+                </button>
+
+
+
+
+                <button class="button danger" onclick="confirmAction()">
+
+                    Подтвердить
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <script>
+
+
+        let modalForm = null;
+
+
+
+
+        function openConfirmModal(title, text, formId) {
+
+
+            modalForm = formId;
+
+
+
+            document.getElementById(
+                "modal-title"
+            ).textContent = title;
+
+
+
+            document.getElementById(
+                "modal-text"
+            ).textContent = text;
+
+
+
+
+            document
+                .getElementById(
+                    "modal-overlay"
+                )
+                .classList.add(
+                    "show"
+                );
+
+
+        }
+
+
+
+
+
+
+        function closeConfirmModal() {
+
+
+            document
+                .getElementById(
+                    "modal-overlay"
+                )
+                .classList.remove(
+                    "show"
+                );
+
+
+        }
+
+
+
+
+
+
+
+        function confirmAction() {
+
+            if (!modalForm)
+                return;
+
+
+            const form =
+                document.getElementById(modalForm);
+
+
+            if (form) {
+
+                form.submit();
+
+            }
+
+        }
+
+
+
+
+
+
+
+        document
+            .getElementById(
+                "modal-overlay"
+            )
+            .addEventListener(
+                "click",
+                function (e) {
+
+
+                    if (e.target === this) {
+
+                        closeConfirmModal();
+
+                    }
+
+
+                }
+            );
+
+
+
+
+
+
+        document.addEventListener(
+            "keydown",
+            function (e) {
+
+
+                if (e.key === "Escape") {
+
+                    closeConfirmModal();
+
+                }
+
+
+            }
+        );
+
+
+
+    </script>
 
 
 

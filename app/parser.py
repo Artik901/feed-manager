@@ -95,6 +95,44 @@ def get_category_path(category_id, categories):
 
     return path
 
+def get_category_id_path(category_id, categories):
+
+    path = []
+
+    current_id = category_id
+
+    visited = set()
+
+
+    while current_id:
+
+
+        if current_id in visited:
+            break
+
+
+        visited.add(current_id)
+
+
+        category = categories.get(
+            str(current_id)
+        )
+
+
+        if not category:
+            break
+
+
+        path.append(
+            str(current_id)
+        )
+
+
+        current_id = category["parent"]
+
+
+    return path
+
 def show_first_offer(root):
     """
     Показывает первый товар из XML
@@ -152,10 +190,20 @@ def parse_offers(root, categories):
                 category_id,
                 categories
             )
+            id_path = get_category_id_path(
+                category_id,
+                categories
+        )
 
             data["category_id"] = category_id
 
             data["category_path"] = path
+
+            data["category_path_ids"] = id_path
+            print(
+                "CATEGORY IDS:",
+                id_path
+            )
 
             if path:
                 data["root_category"] = path[-1]
@@ -209,6 +257,7 @@ def create_offer_xml(data):
             "id",
             "available",
             "category_path",
+            "category_path_ids",
             "root_category",
             "category_id"
         ):

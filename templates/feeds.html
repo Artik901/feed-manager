@@ -6,56 +6,184 @@
 {% endblock %}
 
 
+
 {% block content %}
 
 
-<h1>
-📦 Фиды
-</h1>
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            📦 Фиды
+        </h1>
+
+        <p class="page-description">
+            XML ссылки для маркетплейсов и внешних площадок
+        </p>
+
+    </div>
+
+</div>
 
 
-<div class="cards">
+
+
+
+<div class="card feed-list">
 
 
 {% for feed in feeds %}
 
 
-<div class="card feed-card">
+
+<div class="feed-row">
 
 
-<h2>
-{{feed.name}}
-</h2>
+
+<div class="feed-main">
 
 
-<div class="feed-info">
+<div class="feed-title">
+
+📄 {{ feed.name }}
+
+</div>
+
+
+
+<div class="feed-meta">
 
 Товаров:
 
 <b>
-{{feed.offers}}
+{{ feed.offers }}
 </b>
 
 </div>
 
 
 
-<a class="button feed-button"
+<div class="feed-url">
+
+{{ request.host_url }}feed/{{ feed.slug }}
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="feed-actions">
+
+
+<a
+class="button small"
 href="/feed/{{feed.slug}}"
 target="_blank">
 
-Открыть XML
+👁 Открыть
 
 </a>
 
 
+
+<a
+class="button secondary small"
+href="/feed/{{feed.slug}}"
+download>
+
+⬇ Скачать
+
+</a>
+
+
+
+<button
+class="button copy small"
+onclick="copyFeed(
+'{{ request.host_url }}feed/{{ feed.slug }}'
+)">
+
+🔗 Скопировать
+
+</button>
+
+
+
 </div>
+
+
+
+
+</div>
+
 
 
 {% endfor %}
 
 
+
 </div>
+
+
+
+
+
+<div id="toast">
+
+Ссылка скопирована ✓
+
+</div>
+
+
+
+
+
+
+<script>
+
+
+function copyFeed(url){
+
+
+    navigator.clipboard.writeText(url);
+
+
+    let toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    setTimeout(()=>{
+
+
+        toast.classList.remove(
+            "show"
+        );
+
+
+    },2000);
+
+
+
+}
+
+
+
+</script>
+
 
 
 {% endblock %}

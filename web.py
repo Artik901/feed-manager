@@ -1,4 +1,21 @@
-from flask import Flask, render_template, redirect, send_file, request
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    send_file,
+    request,
+    session,
+    flash,
+    url_for
+)
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    login_required
+)
+
+from app.auth import User, check_login
 import subprocess
 from pathlib import Path
 import json
@@ -19,6 +36,11 @@ from app.settings_manager import (
     load_settings,
     save_settings
 )
+from app.description_manager import (
+    load_description_settings,
+    save_description_settings,
+    clear_all_descriptions
+)
 from config.config import (
     DEBUG,
     LOG_FILE,
@@ -35,6 +57,19 @@ app = Flask(
     static_folder="static",
     template_folder="templates"
 )
+
+login_manager = LoginManager()
+
+login_manager.init_app(app)
+
+login_manager.login_view = "login"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+
+    return User(user_id)
+
 def start_feed_update():
 
     try:
@@ -64,12 +99,58 @@ def inject_globals():
 
 app.secret_key = SECRET_KEY
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username"
+        )
+
+        password = request.form.get(
+            "password"
+        )
+
+
+        if check_login(
+            username,
+            password
+        ):
+
+            login_user(
+                User(username)
+            )
+
+            session["user"] = username
+
+            return redirect("/")
+
+
+        return "Неверный логин или пароль", 401
+
+
+    return render_template(
+        "login.html"
+    )
+
+
+
+@app.route("/logout")
+def logout():
+
+    logout_user()
+
+    session.clear()
+
+    return redirect("/login")
 
 # =========================
 # Главная
 # =========================
 
 @app.route("/")
+@login_required
 def index():
 
     log = None
@@ -99,6 +180,7 @@ def index():
 # =========================
 
 @app.route("/run")
+@login_required
 def run():
 
     main()
@@ -112,6 +194,7 @@ def run():
 # =========================
 
 @app.route("/feeds")
+@login_required
 def feeds():
 
     data = []
@@ -142,6 +225,7 @@ def feeds():
 
 
 @app.route("/feed/<slug>")
+@login_required
 def open_feed(slug):
 
     file = Path(
@@ -168,6 +252,7 @@ def open_feed(slug):
 # =========================
 
 @app.route("/history")
+@login_required
 def history():
 
     logs = get_history()
@@ -184,6 +269,7 @@ def history():
 # =========================
 
 @app.route("/settings")
+@login_required
 def settings():
 
     current_settings = load_settings()
@@ -311,12 +397,127 @@ def settings():
         )
     )
 
+    active_count = 0
+
+    for category in categories.values():
+
+        if category["percent"] > 0:
+            active_count += 1
+
+
+        for child in category["children"]:
+
+            if child["percent"] > 0:
+                active_count += 1
+
+    return render_template(
+    "settings.html",
+    categories=categories,
+    settings=current_settings,
+    active_count=active_count
+)
+@app.route("/descriptions")
+@login_required
+def descriptions():
+
+    current = load_description_settings()
+    rules = {}
+
+
+    for item in current.get("rules", []):
+
+        rules[str(item["category_id"])] = item
+
+    categories = {}
+
+    xml = Path(
+        SOURCE_XML
+    )
+
+    if xml.exists():
+
+        root = load_xml(xml)
+
+        all_categories = parse_categories(root)
+
+
+        for cid, cat in all_categories.items():
+
+            if not cat.get("parent"):
+
+                categories[cid] = {
+
+                    "id": cid,
+
+                    "name": cat.get(
+                        "name",
+                        cid
+                    ),
+
+                    "before": rules.get(
+                        str(cid),
+                        {}
+                    ).get(
+                        "before",
+                        ""
+                    ),
+
+                    "after": rules.get(
+                        str(cid),
+                        {}
+                    ).get(
+                        "after",
+                        ""
+                    ),
+
+                    "children": []
+
+                }
+
+
+
+        for cid, cat in all_categories.items():
+
+            parent = str(
+                cat.get("parent")
+            )
+
+
+            if parent in categories:
+
+                categories[parent]["children"].append({
+
+                    "id": cid,
+
+                    "name": cat.get(
+                        "name",
+                        cid
+                    ),
+
+                    "before": rules.get(
+                        str(cid),
+                        {}
+                    ).get(
+                        "before",
+                        ""
+                    ),
+
+                    "after": rules.get(
+                        str(cid),
+                        {}
+                    ).get(
+                        "after",
+                        ""
+                    )
+
+                })
+
 
 
     return render_template(
-        "settings.html",
+        "descriptions.html",
         categories=categories,
-        settings=current_settings
+        description_settings=current
     )
 
 # =========================
@@ -327,6 +528,7 @@ def settings():
     "/settings/save",
     methods=["POST"]
 )
+@login_required
 def save_settings_page():
 
 
@@ -374,30 +576,117 @@ def save_settings_page():
             )
 
 
-    save_settings(
+    current = load_settings()
 
-        {
-            "markup": rules
-        }
+    current["markup"] = rules
 
-    )
+    save_settings(current)
+
     start_feed_update()
 
     return redirect(
         "/settings"
     )
 @app.route("/settings/clear_markup", methods=["POST"])
+@login_required
 def clear_markup():
 
-    save_settings(
-        {
-            "markup": []
-        }
-    )
+    current = load_settings()
+
+    current["markup"] = []
+
+    save_settings(current)
+
     start_feed_update()
 
     return redirect("/settings")
 
+@app.route(
+    "/descriptions/save",
+    methods=["POST"]
+)
+@login_required
+def save_descriptions_page():
+
+    current = load_description_settings()
+
+
+    rules = []
+
+
+    # получаем все категории из формы
+    for key in request.form:
+
+
+        if key.startswith("before_"):
+
+            category_id = key.replace(
+                "before_",
+                ""
+            )
+
+
+            before = request.form.get(
+                key,
+                ""
+            ).strip()
+
+
+            after = request.form.get(
+                "after_" + category_id,
+                ""
+            ).strip()
+
+
+
+            if before or after:
+
+
+                rules.append(
+                    {
+                        "category_id": category_id,
+                        "before": before,
+                        "after": after,
+                        "enabled": True
+                    }
+                )
+
+
+
+    current["enabled"] = bool(rules)
+
+    current["rules"] = rules
+
+
+    save_description_settings(
+        current
+    )
+
+
+    start_feed_update()
+
+
+    return redirect(
+        "/descriptions"
+    )
+
+
+@app.route("/descriptions/clear", methods=["POST"])
+@login_required
+def clear_descriptions():
+
+    clear_all_descriptions()
+
+    start_feed_update()
+
+    flash(
+        "Все описания очищены",
+        "success"
+    )
+
+    return redirect(
+        url_for("descriptions")
+    )
 @app.route("/health")
 def health():
 

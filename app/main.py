@@ -8,13 +8,17 @@ from app.feed_builder import (
 )
 from app.logger import save_run_log
 from app.markup import apply_markup
+from app.description import apply_description
+
 from app.parser import (
     load_xml,
     parse_categories,
     parse_offers,
     group_by_root_category
 )
+
 from app.validator import validate_settings
+
 
 def main():
 
@@ -27,69 +31,124 @@ def main():
     offers = []
     categories = {}
 
+
     try:
+
 
         download_result = download_feed()
 
         xml_file = download_result["path"]
 
+
         cleanup_storage()
+
 
         root = load_xml(xml_file)
 
+
         print("Анализ категорий...")
 
+
         categories = parse_categories(root)
+
+
         validate_settings(categories)
+
+
         print(
             "Категорий найдено:",
             len(categories)
         )
+
+
 
         offers = parse_offers(
             root,
             categories
         )
 
+
         print(
             "Товаров найдено:",
             len(offers)
         )
 
+
+
         print(
-            "Применение правил наценки..."
+            "Применение правил наценки и описаний..."
         )
 
+
+
         for offer in offers:
+
+
 
             apply_markup(
                 offer,
                 categories
             )
 
+
+
+            category_chain = offer.get(
+                "category_path_ids",
+                []
+            )
+
+
+
+            apply_description(
+                offer,
+                category_chain
+            )
+
+
+
+
+
         groups = group_by_root_category(
             offers
         )
 
+
+
         print()
-        print("Создание полноценных фидов")
+
+        print(
+            "Создание полноценных фидов"
+        )
+
         print("================")
+
+
+
 
         for category, products in groups.items():
 
+
             try:
+
+
 
                 tree = create_feed(
                     products,
                     categories
                 )
 
+
+
                 filename = save_feed(
                     tree,
                     category
                 )
 
+
+
                 generated_total += len(products)
+
+
 
                 print(
                     filename,
@@ -97,6 +156,8 @@ def main():
                     len(products),
                     "товаров"
                 )
+
+
 
                 generated_feeds.append(
                     {
@@ -107,15 +168,23 @@ def main():
                     }
                 )
 
+
+
                 success += 1
 
+
+
+
             except Exception as e:
+
+
 
                 print(
                     "ОШИБКА:",
                     category,
                     e
                 )
+
 
                 errors.append(
                     {
@@ -124,21 +193,33 @@ def main():
                     }
                 )
 
+
+
+
+
         print()
+
+
 
         if generated_total != len(offers):
 
-            print("ОШИБКА ПРОВЕРКИ!")
+
+            print(
+                "ОШИБКА ПРОВЕРКИ!"
+            )
+
 
             print(
                 "Источник:",
                 len(offers)
             )
 
+
             print(
                 "Создано:",
                 generated_total
             )
+
 
             errors.append(
                 {
@@ -147,24 +228,42 @@ def main():
                 }
             )
 
+
+
         else:
 
-            print("Проверка товаров: OK")
+
+            print(
+                "Проверка товаров: OK"
+            )
+
+
+
+
 
         print()
+
         print("================")
+
         print("Готово")
+
         print("================")
+
+
 
         print(
             "Создано фидов:",
             success
         )
 
+
+
         print(
             "Всего товаров:",
             len(offers)
         )
+
+
 
         status = (
             "success"
@@ -172,13 +271,28 @@ def main():
             else "error"
         )
 
+
+
+
+
     except Exception as e:
+
+
 
         status = "error"
 
+
+
         print()
-        print("КРИТИЧЕСКАЯ ОШИБКА")
+
+        print(
+            "КРИТИЧЕСКАЯ ОШИБКА"
+        )
+
+
         print(e)
+
+
 
         errors.append(
             {
@@ -188,16 +302,23 @@ def main():
         )
 
 
+
+
+
     finally:
+
+
 
         duration_seconds = (
             datetime.now() - start_time
         ).total_seconds()
 
 
+
         duration = (
             f"{duration_seconds:.2f} сек"
         )
+
 
 
         save_run_log(
@@ -212,5 +333,9 @@ def main():
         )
 
 
+
+
+
 if __name__ == "__main__":
+
     main()

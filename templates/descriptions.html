@@ -1,0 +1,477 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+<div class="page-header">
+
+    <div>
+        <h1>📝 Описания товаров</h1>
+
+        <p class="page-description">
+            Управление текстами до и после описания товаров
+        </p>
+    </div>
+
+</div>
+
+
+
+<div class="card actions-panel">
+
+    <div class="actions-info">
+
+        <div>
+            Статус:
+
+            <strong>
+                {% if description_settings.enabled %}
+                    🟢 Включены
+                {% else %}
+                    ⚪ Выключены
+                {% endif %}
+            </strong>
+        </div>
+
+
+        <div class="buttons">
+
+
+            <button
+                type="submit"
+                form="description-form"
+                class="save-btn">
+
+                💾 Сохранить
+
+            </button>
+
+
+
+            <button
+                type="button"
+                class="danger"
+                onclick="openConfirmModal(
+                '🧹 Очистить описания?',
+                'Все тексты категорий и подкатегорий будут удалены',
+                'clear-description-form'
+                )">
+
+                🧹 Очистить всё
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+
+<div class="card search-panel">
+
+    <h3>
+        🔍 Поиск категории
+    </h3>
+
+
+    <input
+        id="search"
+        class="search-input"
+        placeholder="Введите название категории или подкатегории...">
+
+</div>
+
+
+
+
+
+<form
+    id="description-form"
+    method="post"
+    action="/descriptions/save">
+
+
+
+<div id="categories">
+
+
+
+{% for id, category in categories.items() %}
+
+
+
+<div
+class="category-card description-category"
+data-name="{{ category.name|lower }}">
+
+
+
+<div
+class="category-header"
+onclick="toggleCategory(this)">
+
+
+<div>
+
+<span class="arrow">▶</span>
+
+
+{{ category.name }}
+
+
+
+{% if category.before or category.after %}
+
+<span class="badge">
+📝 Есть текст
+</span>
+
+{% elif category.children|selectattr("before")|list or category.children|selectattr("after")|list %}
+
+<span class="badge child-warning">
+📂 Внутри есть текст
+</span>
+
+{% endif %}
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="description-category-content">
+
+
+
+<div class="description-grid">
+
+
+
+<div class="description-box">
+
+
+<label>
+
+⬆ Текст сверху
+
+</label>
+
+
+<textarea
+name="before_{{ id }}"
+placeholder="Добавляется перед описанием товара">{{ category.before }}</textarea>
+
+
+</div>
+
+
+
+
+
+<div class="description-box">
+
+
+<label>
+
+⬇ Текст снизу
+
+</label>
+
+
+<textarea
+name="after_{{ id }}"
+placeholder="Добавляется после описания товара">{{ category.after }}</textarea>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+{% if category.children %}
+
+
+<div class="sub-title">
+
+📁 Подкатегории
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+{% for child in category.children %}
+
+
+
+<div
+class="child-card"
+data-name="{{ child.name|lower }}">
+
+
+
+<div class="child-title">
+
+
+<div>
+
+└ {{ child.name }}
+
+</div>
+
+
+
+{% if child.before or child.after %}
+
+<span class="badge small">
+📝
+</span>
+
+{% endif %}
+
+
+</div>
+
+
+
+
+
+
+
+<div class="description-grid">
+
+
+
+<div class="description-box">
+
+
+<label>
+⬆ Сверху
+</label>
+
+
+<textarea
+name="before_{{ child.id }}"
+placeholder="Пусто = использовать категорию">{{ child.before }}</textarea>
+
+
+</div>
+
+
+
+
+
+<div class="description-box">
+
+
+<label>
+⬇ Снизу
+</label>
+
+
+<textarea
+name="after_{{ child.id }}"
+placeholder="Пусто = использовать категорию">{{ child.after }}</textarea>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+{% endfor %}
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+
+</div>
+
+
+</form>
+<form 
+id="clear-description-form"
+method="post"
+action="/descriptions/clear">
+</form>
+
+
+
+
+
+
+
+
+<script>
+
+
+function toggleCategory(el){
+
+
+const card =
+el.closest(".description-category");
+
+
+card.classList.toggle("open");
+
+
+}
+
+
+
+
+
+const search =
+document.getElementById("search");
+
+
+
+if(search){
+
+
+search.addEventListener(
+"input",
+function(){
+
+
+const text =
+this.value
+.toLowerCase()
+.trim();
+
+
+
+document
+.querySelectorAll(".description-category")
+.forEach(card=>{
+
+
+const parentName =
+card.dataset.name;
+
+
+let childFound=false;
+
+
+
+card.querySelectorAll(".child-card")
+.forEach(child=>{
+
+
+const childName =
+child.dataset.name;
+
+
+
+if(childName.includes(text)){
+
+
+child.style.display="block";
+
+childFound=true;
+
+
+}
+else{
+
+
+child.style.display =
+text ? "none" : "block";
+
+
+}
+
+
+});
+
+
+
+
+if(
+text === ""
+||
+parentName.includes(text)
+||
+childFound
+){
+
+
+card.style.display="block";
+
+
+if(childFound || text){
+
+card.classList.add("open");
+
+}
+
+
+}
+else{
+
+
+card.style.display="none";
+
+
+}
+
+
+
+});
+
+
+
+});
+
+}
+
+
+</script>
+
+
+{% endblock %}

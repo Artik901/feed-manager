@@ -6,125 +6,231 @@
 {% endblock %}
 
 
+
 {% block content %}
 
 
-<h1>
-📜 История запусков
-</h1>
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            📜 История запусков
+        </h1>
+
+        <p class="page-description">
+            Последние обновления товарных фидов
+        </p>
+
+    </div>
 
 
-<div class="card">
+</div>
 
 
-<table class="table">
 
 
-<tr>
 
-<th>
-Дата
-</th>
-
-<th>
-Статус
-</th>
-
-<th>
-Время
-</th>
-
-<th>
-Товаров
-</th>
-
-<th>
-Фидов
-</th>
-
-<th>
-Проверка
-</th>
-
-</tr>
+<div class="history-list">
 
 
 
 {% for log in logs %}
 
 
-<tr>
+
+<div class="card history-card">
 
 
-<td>
-{{log.date}}
-</td>
 
 
-<td>
+
+<div class="history-header">
+
+
+
+<div>
+
+
+<div class="history-date">
+
+📅 {{ log.date }}
+
+</div>
+
+
+<div class="history-duration">
+
+⏱ {{ log.duration }}
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div>
+
 
 {% if log.status == "success" or log.status == "OK" %}
 
-<span class="ok">
-OK
+
+<span class="status success">
+
+✓ Успешно
+
 </span>
+
 
 {% else %}
 
-<span class="error">
-{{log.status}}
+
+<span class="status failed">
+
+✕ Ошибка
+
 </span>
+
 
 {% endif %}
 
-</td>
+
+</div>
 
 
-<td>
-{{log.duration}}
-</td>
+
+</div>
 
 
-<td>
-{{log.result.offers}}
-</td>
 
 
-<td>
-{{log.result.feeds}}
-</td>
 
 
-<td>
+
+
+<div class="history-stats">
+
+
+
+<div class="stat-box">
+
+
+<span>
+📦 Товары
+</span>
+
+
+<b>
+{{ log.result.offers }}
+</b>
+
+
+</div>
+
+
+
+
+
+<div class="stat-box">
+
+
+<span>
+📄 Фиды
+</span>
+
+
+<b>
+{{ log.result.feeds }}
+</b>
+
+
+</div>
+
+
+
+
+
+
+<div class="stat-box">
+
+
+<span>
+🔍 Проверка
+</span>
+
+
+<b>
+
 
 {% if log.check.success %}
+
 
 <span class="ok">
 OK
 </span>
 
+
 {% else %}
+
 
 <span class="error">
 Ошибка
 </span>
 
+
 {% endif %}
 
-</td>
 
 
-</tr>
+</b>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+{% if log.error %}
+
+
+<div class="history-error">
+
+
+⚠ {{ log.error }}
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+</div>
+
+
 
 
 {% endfor %}
 
 
 
-</table>
-
-
 </div>
+
+
+
 
 
 {% endblock %}

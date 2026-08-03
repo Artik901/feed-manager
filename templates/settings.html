@@ -4,335 +4,335 @@
 {% block content %}
 
 
-<h1>
-⚙ Настройки наценки
-</h1>
+<div class="page-header">
 
+    <div>
 
+        <h1>
+            💰 Настройки цен
+        </h1>
 
-<div class="card actions">
+        <p class="page-description">
+            Управление наценками по категориям и подкатегориям
+        </p>
 
-
-<div>
-
-<h3>
-⚙ Управление
-</h3>
-
-
-<p>
-Активных категорий:
-{{ categories.values()
-|selectattr("percent","gt",0)
-|list
-|length
-}}
-
-</p>
+    </div>
 
 
 </div>
 
 
 
-<div class="action-buttons">
+
+
+<div class="card actions-panel">
+
+
+    <div class="actions-info">
+
+
+        <div>
+
+            Активных правил:
+
+            <strong>
+                {{ active_count }}
+            </strong>
+
+        </div>
 
 
 
-<form method="post"
-action="/settings/clear_markup">
+        <div class="buttons">
 
 
-<button
-class="danger"
-onclick="return confirm('Очистить все наценки?')"
->
+            <button type="submit" form="markup-form" class="save-btn">
 
-🧹 Очистить все
+                💾 Сохранить
 
-</button>
+            </button>
 
 
-</form>
+
+            <button type="button" class="danger" onclick="openConfirmModal(
+'🧹 Очистить цены?',
+'Все правила наценки будут удалены',
+'clear-form'
+)">
+                🧹 Очистить всё
+            </button>
+
+
+        </div>
+
+
+
+    </div>
 
 
 </div>
 
 
+
+
+
+
+
+<div class="card search-panel">
+
+
+    <h3>
+        🔍 Поиск категорий
+    </h3>
+
+
+    <input id="search" class="search-input" placeholder="Введите категорию или подкатегорию...">
+
+
 </div>
 
 
 
-<br>
-
-
-
-<form method="post"
-action="/settings/save">
 
 
 
 
-
-{% for id, category in categories.items() %}
-
+<form id="markup-form" method="post" action="/settings/save">
 
 
-<div class="card category
 
-{% if category.percent > 0
-or category.children|selectattr('percent','gt',0)|list
-%}
-open
+    <div id="categories">
+
+
+
+        {% for id, category in categories.items() %}
+
+
+
+        <div class="category-card
+{% if category.children
+and category.children|selectattr("percent", "gt", 0)|list %}
+has-child-markup
 {% endif %}
+"
+data-name="{{ category.name|lower }}">
 
-">
 
 
+            <div class="category-header" onclick="toggle(this)">
 
 
 
-<div class="category-title"
-onclick="toggle(this)"
->
+                <div>
 
 
-<div>
+                    <span class="arrow">
+                        ▶
+                    </span>
 
 
-{{ category.name }}
+                    {{ category.name }}
 
 
 
-{% if category.percent > 0 %}
+                    {% if category.percent > 0 %}
 
+                    <span class="badge">
 
-<span class="badge">
+                        🔥 {{category.percent}}%
 
-🔥 {{ category.percent }}%
+                    </span>
 
-</span>
 
+                    {% elif category.children
+                    and category.children|selectattr("percent", "gt", 0)|list %}
 
+                    <span class="badge folder-badge">
 
-{% elif category.children|selectattr("percent","gt",0)|list %}
+                        📁🔥
 
+                    </span>
 
 
-<span class="badge warning">
+                    {% endif %}
 
-⚙ есть настройки
 
-</span>
 
+                </div>
 
 
-{% endif %}
 
+            </div>
 
 
-</div>
 
 
-<div>
-▼
-</div>
 
 
 
-</div>
+            <div class="price-category-content">
 
 
 
 
 
+                <div class="main-rule">
 
-<div class="category-body">
 
+                    <div>
 
+                        Основная категория
 
+                    </div>
 
 
-<div class="main-row">
 
+                    <div class="counter">
 
 
-<div>
+                        <input type="hidden" name="category_id" value="{{category.id}}">
 
 
-<b>
-Основная категория
-</b>
 
+                        <button type="button" class="counter-minus" onclick="changePercent(this,-1)">
 
-<input
-type="hidden"
-name="category_id"
-value="{{category.id}}"
->
+                            −
 
+                        </button>
 
-</div>
 
 
+                        <input readonly class="percent-input" name="percent" value="{{category.percent}}">
 
 
 
-<div class="percent-box">
+                        <button type="button" class="counter-plus" onclick="changePercent(this,1)">
 
+                            +
 
-<input
+                        </button>
 
-class="percent-input"
 
-type="number"
 
-name="percent"
+                    </div>
 
-value="{{category.percent}}"
 
-onfocus="clearZero(this)"
 
->
+                </div>
 
 
-<span>
-%
-</span>
 
 
-</div>
 
 
 
-</div>
 
 
+                {% for child in category.children %}
 
 
 
 
+                <div class="price-child-rule" data-name="{{child.name|lower}}">
 
-{% for child in category.children %}
 
 
 
-<div class="child-row">
 
+                    <div>
 
 
-<div class="child-name">
+                        {{child.name}}
 
 
-{{ child.name }}
 
+                        {% if child.percent > 0 %}
 
 
+                        <span class="badge">
 
-{% if child.percent > 0 %}
+                            🔥 {{child.percent}}%
 
+                        </span>
 
 
-<span class="badge">
+                        {% endif %}
 
-🔥 {{ child.percent }}%
 
-</span>
+                    </div>
 
 
 
-{% endif %}
 
 
 
-</div>
 
+                    <div class="counter">
 
 
+                        <input type="hidden" name="category_id" value="{{child.id}}">
 
 
-<div class="percent-box">
 
+                        <button type="button" class="counter-minus" onclick="changePercent(this,-1)">
 
-<input
+                            −
 
-type="hidden"
+                        </button>
 
-name="category_id"
 
-value="{{child.id}}"
 
->
+                        <input readonly class="percent-input" name="percent" value="{{child.percent}}">
 
 
 
+                        <button type="button" class="counter-plus" onclick="changePercent(this,1)">
 
-<input
+                            +
 
-class="percent-input"
+                        </button>
 
-type="number"
 
-name="percent"
 
-value="{{child.percent}}"
+                    </div>
 
-onfocus="clearZero(this)"
 
->
 
+                </div>
 
 
-<span>
-%
-</span>
 
 
-</div>
 
+                {% endfor %}
 
 
-</div>
 
 
 
 
-{% endfor %}
+            </div>
 
 
 
+        </div>
 
 
-</div>
 
 
 
+        {% endfor %}
 
-</div>
 
 
-
-
-
-{% endfor %}
-
-
-
-
-
-<br>
-
-
-
-<button>
-
-💾 Сохранить
-
-</button>
+    </div>
 
 
 
 </form>
+<form id="clear-form" method="post" action="/settings/clear_markup">
+</form>
+
 
 
 
@@ -343,30 +343,164 @@ onfocus="clearZero(this)"
 <script>
 
 
-function toggle(el){
 
-    el.parentElement.classList.toggle(
-        "open"
-    );
+    function toggle(el) {
 
-}
+        const card =
+            el.closest(".category-card");
 
 
+        if (card) {
 
-function clearZero(el){
+            card.classList.toggle("open");
 
-    if(el.value === "0"){
-
-        el.value = "";
+        }
 
     }
 
-}
+
+
+
+
+
+
+    function changePercent(btn, value) {
+
+
+        let input =
+            btn.parentElement.querySelector(
+                ".percent-input"
+            );
+
+
+        let current =
+            parseInt(input.value || 0);
+
+
+        current += value;
+
+
+        if (current < 0)
+            current = 0;
+
+
+
+        input.value = current;
+
+
+    }
+
+
+
+
+
+
+
+
+    const search =
+        document.getElementById(
+            "search"
+        );
+
+
+
+    search.addEventListener(
+        "input",
+        function () {
+
+
+            let text =
+                this.value.toLowerCase();
+
+
+
+            document.querySelectorAll(
+                ".category-card"
+            )
+                .forEach(card => {
+
+
+                    let parentMatch =
+                        card.dataset.name.includes(text);
+
+
+
+                    let childMatch = false;
+
+
+
+
+                    card.querySelectorAll(
+                        ".price-child-rule"
+                    )
+                        .forEach(child => {
+
+
+                            if (
+                                child.dataset.name.includes(text)
+                            ) {
+
+
+                                child.style.display = "flex";
+
+                                childMatch = true;
+
+
+                            }
+                            else {
+
+
+                                child.style.display =
+                                    text ? "none" : "flex";
+
+
+                            }
+
+
+
+                        });
+
+
+
+
+
+                    if (
+                        parentMatch ||
+                        childMatch ||
+                        text == ""
+                    ) {
+
+
+                        card.style.display = "block";
+
+
+                        if (childMatch)
+                            card.classList.add(
+                                "open"
+                            );
+
+
+
+                    }
+                    else {
+
+
+                        card.style.display = "none";
+
+
+                    }
+
+
+
+                });
+
+
+
+        });
 
 
 
 </script>
-
 
 
 

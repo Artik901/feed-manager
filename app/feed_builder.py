@@ -12,9 +12,6 @@ from config.config import (
 )
 
 
-
-
-
 def create_feed(
         offers,
         categories
@@ -66,9 +63,15 @@ def create_feed(
     )
 
 
+    feed_categories = get_feed_categories(
+        offers,
+        categories
+    )
+
+
     add_categories(
         shop,
-        categories
+        feed_categories
     )
 
 
@@ -81,6 +84,56 @@ def create_feed(
     return etree.ElementTree(root)
 
 
+
+def get_feed_categories(
+        offers,
+        categories
+):
+
+    result = {}
+
+
+    for offer in offers:
+
+        current = str(
+            offer.get("category_id")
+        )
+
+
+        while current:
+
+
+            if current in result:
+                break
+
+
+            category = categories.get(
+                current
+            )
+
+
+            if not category:
+                break
+
+
+            result[current] = category
+
+
+            parent = category.get(
+                "parent"
+            )
+
+
+            if parent:
+
+                current = str(parent)
+
+            else:
+
+                break
+
+
+    return result
 
 
 
@@ -95,7 +148,44 @@ def add_categories(
     )
 
 
-    for cat_id, cat in categories.items():
+    def category_depth(cat_id):
+
+        depth = 0
+
+        parent = categories[cat_id].get(
+            "parent"
+        )
+
+
+        while parent:
+
+            depth += 1
+
+            parent_cat = categories.get(
+                str(parent)
+            )
+
+
+            if not parent_cat:
+                break
+
+
+            parent = parent_cat.get(
+                "parent"
+            )
+
+
+        return depth
+
+
+
+    for cat_id in sorted(
+        categories.keys(),
+        key=category_depth
+    ):
+
+        cat = categories[cat_id]
+
 
         category = etree.SubElement(
             node,
@@ -116,8 +206,6 @@ def add_categories(
 
 
 
-
-
 def add_offers(
         shop,
         offers
@@ -128,11 +216,18 @@ def add_offers(
         "offers"
     )
 
+
     for item in offers:
-        xml = create_offer_xml(item)
+
+        xml = create_offer_xml(
+            item
+        )
+
+
         node.append(
             xml
         )
+
 
 
 def save_feed(
@@ -140,7 +235,10 @@ def save_feed(
         category
 ):
 
-    folder = Path(FEEDS_DIR)
+    folder = Path(
+        FEEDS_DIR
+    )
+
 
     folder.mkdir(
         exist_ok=True
@@ -171,13 +269,18 @@ def save_feed(
     )
 
 
-    parsed = etree.parse(temp)
+    parsed = etree.parse(
+        temp
+    )
+
 
     offers = parsed.xpath(
         ".//offer"
     )
 
+
     if not offers:
+
         raise Exception(
             "Создан пустой feed"
         )
