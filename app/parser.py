@@ -200,10 +200,6 @@ def parse_offers(root, categories):
             data["category_path"] = path
 
             data["category_path_ids"] = id_path
-            print(
-                "CATEGORY IDS:",
-                id_path
-            )
 
             if path:
                 data["root_category"] = path[-1]
