@@ -75,7 +75,6 @@ def start_feed_update():
     try:
         subprocess.Popen(
             [
-                "sudo",
                 "systemctl",
                 "start",
                 "feed-update.service"
