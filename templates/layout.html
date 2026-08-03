@@ -2,10 +2,14 @@
 <html lang="ru">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
     <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+
 
     <title>
         {% block title %}
@@ -13,11 +17,14 @@
         {% endblock %}
     </title>
 
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 
 <body>
+
 
 {% if current_user.is_authenticated %}
 
@@ -26,55 +33,81 @@
 
     <aside class="sidebar">
 
+
         <div class="brand">
+
 
             <div class="brand-icon">
                 🚀
             </div>
 
+
             <div>
+
                 <div class="brand-title">
                     Feed Manager
                 </div>
 
+
                 <div class="brand-shop">
                     {{ shop_name }}
                 </div>
+
+
             </div>
+
 
         </div>
 
 
+
         <nav class="menu">
 
+
             <a href="/" class="{% if request.path=='/' %}active{% endif %}">
+
                 <span>🏠</span>
+
                 Главная
+
             </a>
 
 
             <a href="/feeds" class="{% if request.path.startswith('/feeds') %}active{% endif %}">
+
                 <span>📦</span>
+
                 Фиды
+
             </a>
 
 
             <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
+
                 <span>📜</span>
+
                 История
+
             </a>
 
 
             <a href="/settings" class="{% if request.path.startswith('/settings') %}active{% endif %}">
+
                 <span>💰</span>
+
                 Наценки
+
             </a>
 
 
             <a href="/descriptions" class="{% if request.path.startswith('/descriptions') %}active{% endif %}">
+
                 <span>📝</span>
+
                 Описания
+
             </a>
+
 
         </nav>
 
@@ -82,7 +115,9 @@
 
         <div class="sidebar-bottom">
 
+
             <div class="user-card">
+
 
                 <div class="avatar">
                     👤
@@ -100,14 +135,20 @@
                         Администратор
                     </div>
 
+
                 </div>
+
 
             </div>
 
 
+
             <a class="logout" href="/logout">
+
                 🚪 Выйти
+
             </a>
+
 
         </div>
 
@@ -116,9 +157,8 @@
 
 
 
-
-
     <div class="main-area">
+
 
 
         <header class="topbar">
@@ -128,28 +168,45 @@
 
                 <h2>
 
+
                     {% if request.path=='/' %}
-                        Главная
+
+                    Главная
+
 
                     {% elif request.path.startswith('/feeds') %}
-                        Фиды
+
+                    Фиды
+
 
                     {% elif request.path.startswith('/history') %}
-                        История
+
+                    История
+
 
                     {% elif request.path.startswith('/settings') %}
-                        Наценки
+
+                    Наценки
+
 
                     {% elif request.path.startswith('/descriptions') %}
-                        Описания
+
+                    Описания
+
 
                     {% else %}
-                        Feed Manager
+
+                    Feed Manager
+
+
                     {% endif %}
+
 
                 </h2>
 
+
             </div>
+
 
 
             <div class="system-status">
@@ -165,62 +222,89 @@
 
 
 
+{% else %}
 
 
-        <main class="content">
+<div class="login-layout">
 
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-
-            {% if messages %}
-
-            <div class="flash-container">
-
-                {% for category, message in messages %}
-
-                <div class="flash {{ category }}">
-                    {{ message }}
-                </div>
-
-                {% endfor %}
-
-            </div>
-
-            {% endif %}
-
-            {% endwith %}
+{% endif %}
 
 
 
-            {% block content %}
-            {% endblock %}
+<main class="content">
 
 
-        </main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
 
 
+    {% if messages %}
+
+
+    <div class="flash-container">
+
+
+        {% for category, message in messages %}
+
+
+        <div class="flash {{ category }}">
+
+            {{ message }}
+
+        </div>
+
+
+        {% endfor %}
+
+
+    </div>
+
+
+    {% endif %}
+
+
+    {% endwith %}
+
+
+
+    {% block content %}
+
+    {% endblock %}
+
+
+
+</main>
+
+
+
+{% if current_user.is_authenticated %}
 
 
 
         <footer>
 
+
             {{ shop_name }}
+
 
             <span>
                 ·
             </span>
 
+
             Feed Manager
+
 
             <span>
                 v{{ app_version }}
             </span>
 
+
         </footer>
 
 
-    </div>
 
+    </div>
 
 
 </div>
@@ -230,13 +314,6 @@
 {% else %}
 
 
-<div class="login-layout">
-
-
-    {% block content %}
-    {% endblock %}
-
-
 </div>
 
 
@@ -244,6 +321,11 @@
 
 
 
+
+
+
+
+<!-- UNIVERSAL MODAL -->
 
 
 <div id="modal-overlay" class="modal-overlay">
@@ -257,25 +339,36 @@
         </h3>
 
 
+
         <p id="modal-text">
             Вы уверены?
         </p>
+
+
 
 
         <div class="modal-actions">
 
 
             <button class="button secondary" onclick="closeConfirmModal()">
+
                 Отмена
+
             </button>
+
+
 
 
             <button class="button danger" onclick="confirmAction()">
+
                 Подтвердить
+
             </button>
 
 
+
         </div>
+
 
 
     </div>
@@ -287,83 +380,135 @@
 
 
 
+
+
 <script>
+
 
 let modalForm = null;
 
 
+
 function openConfirmModal(title, text, formId) {
+
 
     modalForm = formId;
 
-    document.getElementById("modal-title").textContent = title;
 
-    document.getElementById("modal-text").textContent = text;
+
+    document.getElementById(
+        "modal-title"
+    ).textContent = title;
+
+
+
+    document.getElementById(
+        "modal-text"
+    ).textContent = text;
+
 
 
     document
-        .getElementById("modal-overlay")
-        .classList.add("show");
+        .getElementById(
+            "modal-overlay"
+        )
+        .classList.add(
+            "show"
+        );
+
 
 }
+
+
 
 
 
 function closeConfirmModal() {
 
+
     document
-        .getElementById("modal-overlay")
-        .classList.remove("show");
+        .getElementById(
+            "modal-overlay"
+        )
+        .classList.remove(
+            "show"
+        );
+
 
 }
+
+
 
 
 
 function confirmAction() {
 
+
     if (!modalForm)
         return;
 
 
-    const form = document.getElementById(modalForm);
+    const form =
+        document.getElementById(modalForm);
+
 
 
     if (form) {
+
         form.submit();
+
     }
+
 
 }
 
 
 
+
+
 document
-    .getElementById("modal-overlay")
+    .getElementById(
+        "modal-overlay"
+    )
     .addEventListener(
         "click",
-        function(e) {
+        function (e) {
+
 
             if (e.target === this) {
+
                 closeConfirmModal();
+
             }
+
 
         }
     );
 
 
 
+
+
+
 document.addEventListener(
     "keydown",
-    function(e) {
+    function (e) {
+
 
         if (e.key === "Escape") {
+
             closeConfirmModal();
+
         }
+
 
     }
 );
 
 
+
 </script>
+
 
 
 </body>
