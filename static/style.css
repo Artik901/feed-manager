@@ -2579,3 +2579,139 @@ textarea:focus {
     }
 
 }
+/* =========================
+   MOBILE ADAPTATION
+========================= */
+
+@media (max-width: 768px) {
+
+
+    .app-layout {
+        display: block;
+    }
+
+
+    /* SIDEBAR */
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+
+    .brand {
+        padding: 15px;
+    }
+
+
+    .menu {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 10px;
+    }
+
+
+    .menu a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+
+
+    .sidebar-bottom {
+        display: none;
+    }
+
+
+
+    /* MAIN */
+
+    .main-area {
+        width: 100%;
+    }
+
+
+    .topbar {
+        padding: 12px;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+
+    .content {
+        padding: 10px;
+    }
+
+
+
+    /* ACTION BUTTONS */
+
+    .actions-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+
+    .buttons {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+
+    .buttons button {
+        width: 100%;
+    }
+
+
+
+    /* SEARCH */
+
+    .search-input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+
+
+    /* DESCRIPTION CARDS */
+
+    .description-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .category-header {
+        font-size: 15px;
+    }
+
+
+    .child-title {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+
+    textarea {
+        min-height: 120px;
+        font-size: 15px;
+    }
+
+
+
+    /* FOOTER */
+
+    footer {
+        text-align: center;
+        font-size: 13px;
+        padding: 15px;
+    }
+
+
+}
