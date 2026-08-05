@@ -224,7 +224,6 @@ def feeds():
 
 
 @app.route("/feed/<slug>")
-@login_required
 def open_feed(slug):
 
     file = Path(
